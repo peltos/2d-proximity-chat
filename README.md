@@ -95,27 +95,37 @@ If you want to run the backend locally and have the GitHub Pages frontend connec
 
 2. **Expose your local backend** using one of these methods:
 
-   **Option A: Using localtunnel** (Easiest - No installation needed)
+   **Option A: Using localtunnel** (Recommended - Easiest, no installation needed)
    ```bash
    npx localtunnel --port 3001
    # Copy the HTTPS URL provided (e.g., https://abc123.loca.lt)
    # IMPORTANT: Visit the URL in your browser first to accept the connection
    # You'll see a page asking to "Continue to localhost" - click it
    # This is required before the frontend can connect (otherwise you'll get 511 errors)
+   # Note: localtunnel works better with programmatic requests than ngrok free tier
    ```
 
-   **Option B: Using ngrok** (Requires installation)
+   **Option B: Using ngrok** (Requires installation, free tier has limitations)
    ```bash
    # Download and install ngrok from: https://ngrok.com/download
    # For Windows: Download the .zip, extract, and add to PATH
    # Or use Chocolatey: choco install ngrok
    ngrok http 3001
-   # Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
+   # Copy the HTTPS URL (e.g., https://abc123.ngrok-free.app)
+   # IMPORTANT: ngrok free tier intercepts programmatic requests (like Socket.io)
+   # and shows a warning page, which breaks Socket.io connections
+   # Solution: Upgrade to ngrok paid plan, or use localtunnel instead (recommended)
    ```
 
    **Option C: Using Cloudflare Tunnel** (Free, no account needed for basic use)
    ```bash
    # Install: npm install -g cloudflared
+   # On Windows, fix PowerShell execution policy first:
+   # Run PowerShell as Administrator, then:
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   # Or run for current session only:
+   Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+   # Then run:
    cloudflared tunnel --url http://localhost:3001
    # Copy the HTTPS URL provided
    ```
@@ -140,5 +150,8 @@ If you want to run the backend locally and have the GitHub Pages frontend connec
      CLIENT_URL=http://localhost:5173,https://peltos.github.io,https://your-tunnel-url.com npm run dev
      ```
 
-**Note**: For production, it's recommended to deploy the backend to a service like Heroku, Railway, or Render instead of using ngrok.
+**Note**: 
+- For production, it's recommended to deploy the backend to a service like Heroku, Railway, or Render instead of using tunnels
+- **ngrok free tier limitation**: ngrok's free tier intercepts programmatic requests (like Socket.io) and shows a warning page, which breaks WebSocket connections. Use localtunnel instead, or upgrade ngrok to a paid plan
+- **localtunnel** is recommended for development as it works better with Socket.io and WebSocket connections
 
