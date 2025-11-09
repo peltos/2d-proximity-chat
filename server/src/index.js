@@ -8,15 +8,27 @@ const httpServer = createServer(app);
 
 // Allow multiple origins for CORS
 const allowedOrigins = process.env.CLIENT_URL 
-  ? process.env.CLIENT_URL.split(',')
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim())
   : ['http://localhost:5173', 'https://peltos.github.io'];
+
+// Also allow any .loca.lt domain (localtunnel) and .ngrok.io domain (ngrok)
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes('*')) return true;
+  if (allowedOrigins.indexOf(origin) !== -1) return true;
+  // Allow localtunnel domains
+  if (origin.includes('.loca.lt')) return true;
+  // Allow ngrok domains
+  if (origin.includes('.ngrok.io') || origin.includes('.ngrok-free.app')) return true;
+  // Allow cloudflare tunnel domains
+  if (origin.includes('.trycloudflare.com')) return true;
+  return false;
+};
 
 const io = new Server(httpServer, {
   cors: {
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
@@ -29,9 +41,7 @@ const io = new Server(httpServer, {
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

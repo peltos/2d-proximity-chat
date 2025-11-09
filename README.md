@@ -99,7 +99,9 @@ If you want to run the backend locally and have the GitHub Pages frontend connec
    ```bash
    npx localtunnel --port 3001
    # Copy the HTTPS URL provided (e.g., https://abc123.loca.lt)
-   # Note: You may need to visit the URL in a browser first to accept the connection
+   # IMPORTANT: Visit the URL in your browser first to accept the connection
+   # You'll see a page asking to "Continue to localhost" - click it
+   # This is required before the frontend can connect (otherwise you'll get 511 errors)
    ```
 
    **Option B: Using ngrok** (Requires installation)
