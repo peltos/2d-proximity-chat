@@ -196,7 +196,7 @@
 import { ref, onBeforeUnmount, onMounted, nextTick, watch } from 'vue';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:3001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 const MOVE_SPEED = 5;
 
 // Canvas dimensions (will be updated from server)
