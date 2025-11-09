@@ -196,7 +196,36 @@
 import { ref, onBeforeUnmount, onMounted, nextTick, watch } from 'vue';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+// Determine socket URL based on environment
+const getSocketUrl = () => {
+  // Check if we have an explicit environment variable (highest priority)
+  // This is set during build time via GitHub Secrets
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
+  }
+  
+  // Check if we're running on GitHub Pages
+  const hostname = window.location.hostname;
+  const isGitHubPages = hostname === 'peltos.github.io' || hostname.includes('github.io');
+  
+  if (isGitHubPages) {
+    // On GitHub Pages - need an exposed backend URL
+    // If VITE_SOCKET_URL is not set, try to use a local backend exposed via ngrok
+    // You can expose your local backend with: ngrok http 3001
+    // Then set the ngrok URL in GitHub Secrets as VITE_SOCKET_URL
+    // For development/testing, you can manually set it here temporarily:
+    // return 'https://your-ngrok-url.ngrok.io';
+    
+    // Default fallback (won't work unless backend is exposed)
+    console.warn('VITE_SOCKET_URL not set. GitHub Pages frontend needs a backend URL. Set it in GitHub Secrets or expose your local backend with ngrok.');
+    return 'http://localhost:3001'; // This won't work from GitHub Pages - you need to expose your backend
+  }
+  
+  // Local development - use localhost
+  return 'http://localhost:3001';
+};
+
+const SOCKET_URL = getSocketUrl();
 const MOVE_SPEED = 5;
 
 // Canvas dimensions (will be updated from server)

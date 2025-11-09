@@ -83,3 +83,60 @@ The frontend can be deployed to GitHub Pages. The backend server must be deploye
 
 **Note**: GitHub Pages only serves static files. You'll need to deploy the backend server separately to a service that supports Node.js (Heroku, Railway, Render, etc.).
 
+### Running Backend Locally with GitHub Pages Frontend
+
+If you want to run the backend locally and have the GitHub Pages frontend connect to it:
+
+1. **Start your local backend**:
+   ```bash
+   cd server
+   npm run dev
+   ```
+
+2. **Expose your local backend** using one of these methods:
+
+   **Option A: Using localtunnel** (Easiest - No installation needed)
+   ```bash
+   npx localtunnel --port 3001
+   # Copy the HTTPS URL provided (e.g., https://abc123.loca.lt)
+   # Note: You may need to visit the URL in a browser first to accept the connection
+   ```
+
+   **Option B: Using ngrok** (Requires installation)
+   ```bash
+   # Download and install ngrok from: https://ngrok.com/download
+   # For Windows: Download the .zip, extract, and add to PATH
+   # Or use Chocolatey: choco install ngrok
+   ngrok http 3001
+   # Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
+   ```
+
+   **Option C: Using Cloudflare Tunnel** (Free, no account needed for basic use)
+   ```bash
+   # Install: npm install -g cloudflared
+   cloudflared tunnel --url http://localhost:3001
+   # Copy the HTTPS URL provided
+   ```
+
+3. **Update GitHub Secrets**:
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Add/update `VITE_SOCKET_URL` with your exposed backend URL 
+   - Examples:
+     - localtunnel: `https://abc123.loca.lt`
+     - ngrok: `https://abc123.ngrok.io`
+     - cloudflared: `https://abc123.trycloudflare.com`
+   - Push a new commit to trigger a rebuild
+
+4. **Update backend CORS** (if needed):
+   - The backend is already configured to accept connections from `https://peltos.github.io`
+   - If your tunnel URL is different, you may need to add it to `CLIENT_URL` in `server/.env`:
+     ```
+     CLIENT_URL=http://localhost:5173,https://peltos.github.io,https://your-tunnel-url.com
+     ```
+   - Or set it as an environment variable when starting the server:
+     ```bash
+     CLIENT_URL=http://localhost:5173,https://peltos.github.io,https://your-tunnel-url.com npm run dev
+     ```
+
+**Note**: For production, it's recommended to deploy the backend to a service like Heroku, Railway, or Render instead of using ngrok.
+
